@@ -15,7 +15,7 @@ typedef enum _BLOCKTYPE {
     Dirt,
     Stone,
     Brick,
-    Unknown
+    Glass
 } BLOCKTYPE;
 
 typedef struct _BLOCK {

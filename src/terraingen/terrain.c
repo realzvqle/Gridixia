@@ -54,6 +54,10 @@ static Rectangle BlocktypeToTexture(BLOCKTYPE type){
             Rectangle rec = {120, 0, 30, 30};
             return rec;      
         }
+        case Glass:{
+            Rectangle rec = {150, 0, 30, 30};
+            return rec;      
+        }
         default:{
             Rectangle rec = {90, 0, 30, 30};
             return rec;
