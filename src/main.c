@@ -20,10 +20,8 @@ int main(){
         ClearBackground(SKYBLUE);
         BeginMode2D(camera);
         PlayerControl();
-        //GenerateChunk(3);
         RenderChunk(0);
         EndMode2D();
-        SysDrawFPS(10, 10);
         UiCustomizeTerrain();
         EndDrawing();
     }

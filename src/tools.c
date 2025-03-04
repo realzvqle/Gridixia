@@ -2,13 +2,16 @@
 #include "exheaders/raylib.h"
 #include "player.h"
 #include "rayguiabs.h"
-static Font font;
 
+static Font font;
+Texture2D atlas;
 extern Camera2D camera;
+
 
 void SysSetup(){
     SetupCamera();
     font = LoadFontEx("resources/fonts/PixelifySans/PixelifySans-Regular.ttf", 200, NULL, 0);
+    atlas = LoadTexture("resources/textures/atlas.png");
     RayGUIInitialize();
 }
 
@@ -16,8 +19,11 @@ Font SysGetFont(){
     return font;
 }
 
+
+
 void SysClose(){
     UnloadFont(font);
+    UnloadTexture(atlas);
 }
 
 void SysDrawText(const char* text, float posX, float posY, float size, Color color){

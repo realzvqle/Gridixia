@@ -15,6 +15,7 @@ static float height = 10;
 static float spacing = 0.1;
 static bool ThreadCreated = false;
 
+extern Texture2D atlas;
 struct BRETURN{
     uint64_t bnum;
     bool shouldincrement;
@@ -33,7 +34,8 @@ static struct BRETURN GetFreeBlock(){
     return b;
 }
 
-void CreateBlock(int x, int y, Color color){
+void CreateBlock(int x, int y, BLOCKTYPE type){
+    //Color color;
     struct BRETURN b = GetFreeBlock();
     if(blockamount + 1 >= CHUNKSIZE){
         printf("WORLDSIZE LIMIT REACHED\n");
@@ -41,22 +43,46 @@ void CreateBlock(int x, int y, Color color){
     }
     blocks[b.bnum].x = x;//roundf(x / 50.0f) * 50.0f;
     blocks[b.bnum].y = y;//roundf(y / 50.0f) * 50.0f;
-    blocks[b.bnum].color = color;
+    switch(type){
+        case Dirt:
+            blocks[b.bnum].atlas.x = 0;
+            blocks[b.bnum].atlas.y = 0;
+            blocks[b.bnum].atlas.height = 30;
+            blocks[b.bnum].atlas.width = 30;
+            break;
+        case Grass:
+            blocks[b.bnum].atlas.x = 30;
+            blocks[b.bnum].atlas.y = 0;
+            blocks[b.bnum].atlas.height = 30;
+            blocks[b.bnum].atlas.width = 30;
+            break;
+        case Stone:
+            blocks[b.bnum].atlas.x = 60;
+            blocks[b.bnum].atlas.y = 0;
+            blocks[b.bnum].atlas.height = 30;
+            blocks[b.bnum].atlas.width = 30;
+            break;
+        default:
+            blocks[b.bnum].atlas.x =61;
+            blocks[b.bnum].atlas.y = 0;
+            blocks[b.bnum].atlas.height = 30;
+            blocks[b.bnum].atlas.width = 30;
+            break;
+    }
     blocks[b.bnum].isBroken = false;
     // printf("Made a block! BNUM is %llu\n", b.bnum);
     if(b.shouldincrement == true) blockamount++;
 }
 
 DWORD GenerateTerrain(LPVOID args){
-    Color color;
+    BLOCKTYPE type;
     for(int i = 0; i < 300; i++){
         for(int j = 0; j < 300; j++){
             float wave = height*sin(i*spacing) * 30;
-            //Color h = {offset * 10, 0, 0, 255};
-            if(j < 10) color = DARKGREEN;
-            else if(j < 20) color = BROWN;
-            else color = GRAY;
-            CreateBlock((i) * 30, j * 30 + wave, color);
+            if(j < 10) type = Grass;
+            else if(j < 20) type = Dirt;
+            else type = Stone;
+            CreateBlock((i) * 30, j * 30 + wave, type);
         }
     }
     ThreadFinished = true;
@@ -91,7 +117,8 @@ void RenderChunk(int offset) {
         if(fabsf(camera.target.x - blocks[i].x) >= GetScreenWidth()) continue;
         if(fabsf(camera.target.y - blocks[i].y) >= GetScreenHeight()) continue;
         if(blocks[i].isBroken == true) continue;
-        DrawRectangle(blocks[i].x, blocks[i].y, 30, 30, blocks[i].color);
+        Vector2 pos = {blocks[i].x, blocks[i].y};
+        DrawTextureRec(atlas, blocks[i].atlas, pos, WHITE);
         if(fabsf(SysGetMouseX() - blocks[i].x) <= 15 && fabsf(SysGetMouseY() - blocks[i].y) <= 15){
             DrawRectangleLines(blocks[i].x, blocks[i].y, 30, 30, RED);
             if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
@@ -101,10 +128,11 @@ void RenderChunk(int offset) {
             
         }
         if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT)){
+            if(GetMouseX() <= 400 && GetMouseY() <= 400) continue;
             if(GetTime() - prevtime >= 0.1){
                 int x = roundf(SysGetMouseX() / 30.0f) * 30.0f;
                 int y = roundf(SysGetMouseY() / 30.0f) * 30.0f;
-                CreateBlock(x, y, GRAY);
+                CreateBlock(x, y, Stone);
                 printf("Creates Block at %d, %d\n",x, y);
                 prevtime = GetTime();
             }
@@ -116,6 +144,7 @@ void RenderChunk(int offset) {
 }
 
 void UiCustomizeTerrain(){
+    
     if(ThreadFinished == false){
         const char* text = "Generating Terrain";
         SysDrawText(text, ((float)GetScreenWidth() - MeasureTextEx(SysGetFont(), text, 30, 2).x) / 2, 
@@ -126,6 +155,9 @@ void UiCustomizeTerrain(){
         ((float)GetScreenHeight() + 60) / 2, 30, WHITE);
         return;
     }
+    Color bcolor = {100, 0, 0, 100};
+    DrawRectangle(0, 0, 400, 400,bcolor);
+    SysDrawFPS(10, 10);
     RayGUIDrawSlider(10, 50, 200, 50, "", "", &height, 0, 40);
     SysDrawText("Height", 210, 50, 20, BLACK);
     RayGUIDrawSlider(10, 120, 200, 50, "", "", &spacing, 0, 2);
