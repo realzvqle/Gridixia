@@ -20,6 +20,6 @@ void PlayerControl(){
     if(IsKeyDown(KEY_A)) camera.target.x -= 400 * GetFrameTime();
     if(IsKeyDown(KEY_W)) camera.target.y -= 400 * GetFrameTime();
     if(IsKeyDown(KEY_S)) camera.target.y += 400 * GetFrameTime();
-    if(IsKeyPressed(KEY_DOWN)) camera.zoom-=0.1;
-    if(IsKeyPressed(KEY_UP)) camera.zoom+=0.1;
+    // if(IsKeyPressed(KEY_DOWN)) camera.zoom-=0.1;
+    // if(IsKeyPressed(KEY_UP)) camera.zoom+=0.1;
 }

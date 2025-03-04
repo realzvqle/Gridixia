@@ -1,14 +1,19 @@
 #include "tools.h"
 #include "exheaders/raylib.h"
 #include "player.h"
-
+#include "rayguiabs.h"
 static Font font;
 
-//extern Camera2D camera;
+extern Camera2D camera;
 
 void SysSetup(){
     SetupCamera();
     font = LoadFontEx("resources/fonts/PixelifySans/PixelifySans-Regular.ttf", 200, NULL, 0);
+    RayGUIInitialize();
+}
+
+Font SysGetFont(){
+    return font;
 }
 
 void SysClose(){
@@ -23,7 +28,7 @@ void SysDrawText(const char* text, float posX, float posY, float size, Color col
 void SysDrawFPS(float posX, float posY){
     char buffer[512];
     sprintf(buffer, "%d FPS", GetFPS());
-    SysDrawText(buffer, posX, posY, 25,  GREEN);
+    SysDrawText(buffer, posX, posY, 25,  BLACK);
 }
 
 void SysDrawXandY(float posX, float posY, float x, float y){
@@ -93,17 +98,17 @@ float SysGetDistance(float first, float second){
 
 
 
-// float SysGetMouseX(){
-//     Vector2 mouse = {GetMouseX(), GetMouseY()};
-//     Vector2 mousepos = GetScreenToWorld2D(mouse, camera);
-//     return mousepos.x;
-// }
+float SysGetMouseX(){
+    Vector2 mouse = {GetMouseX(), GetMouseY()};
+    Vector2 mousepos = GetScreenToWorld2D(mouse, camera);
+    return mousepos.x;
+}
 
-// float SysGetMouseY(){
-//     Vector2 mouse = {GetMouseX(), GetMouseY()};
-//     Vector2 mousepos = GetScreenToWorld2D(mouse, camera);
-//     return mousepos.y;
-// }
+float SysGetMouseY(){
+    Vector2 mouse = {GetMouseX(), GetMouseY()};
+    Vector2 mousepos = GetScreenToWorld2D(mouse, camera);
+    return mousepos.y;
+}
 float SysGetVersion(){
     return 0.0f;
 }
@@ -112,10 +117,6 @@ void SysDrawVersion(float posx, float posy, float size){
     char buffer[512];
     sprintf(buffer, "Version %0.1f\nBuilt On %s at %s", SysGetVersion(), __DATE__, __TIME__);
     SysDrawText(buffer, posx, posy, size, GOLD);
-}
-
-Font SysGetFont(){
-    return font;
 }
 
 float SysGetDistanceAll(float x1, float y1, float x2, float y2) {

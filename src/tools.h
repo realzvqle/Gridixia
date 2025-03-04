@@ -27,4 +27,5 @@ Font SysGetFont();
 bool SysNPCIsInScreen(float npcx, float npcy);
 float SysGetDistanceAll(float x1, float y1, float x2, float y2);
 void SysDrawXandY(float posX, float posY, float x, float y);
+Font SysGetFont();
 #endif

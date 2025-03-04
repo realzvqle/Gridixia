@@ -1,41 +1,69 @@
 #include "grid.h"
+#include "../tools.h"
+#include "../rayguiabs.h"
+
+extern Camera2D camera;
+
+#define WORLDSIZE 100000
+BLOCK blocks[WORLDSIZE];
+uint64_t blockamount = 0;
+static bool init = false;
+
+static float height = 10;
+static float spacing = 0.1;
+void CreateBlock(int x, int y, Color color){
+    if(blockamount + 1 >= WORLDSIZE){
+        printf("WORLDSIZE LIMIT REACHED\n");
+        return;
+    }
+    blocks[blockamount].x = x;//roundf(x / 50.0f) * 50.0f;
+    blocks[blockamount].y = y;//roundf(y / 50.0f) * 50.0f;
+    blocks[blockamount].color = color;
+    blocks[blockamount].isBroken = false;
+    //printf("Made a block! Position in %d, %d\n", x, y);
+    blockamount++;
+}
 
 
-
-uint8_t grid[ROWS * CELLSIZE] ;
-
-
-void RenderGrid() {
-    static bool init = false;
-    static int size = sizeof(grid) / sizeof(grid[0]);
-
-    if(!init){
-        for(int i = 0; i < size; i++){
-            grid[i] = 1;
+void RenderChunk(int offset) {
+    if(init == false){
+        blockamount = 0;
+        Color color;
+        for(int i = 0; i < 300; i++){
+            for(int j = 0; j < 300; j++){
+                float wave = height*sin(i*spacing) * 30;
+                //Color h = {offset * 10, 0, 0, 255};
+                if(j < 10) color = DARKGREEN;
+                else if(j < 20) color = BROWN;
+                else color = GRAY;
+                CreateBlock((i+offset) * 30, j * 30 + wave, color);
+            }
         }
         init = true;
     }
-    int startY = (GetScreenHeight() / 2) - (ROWS * CELLSIZE) / 2;
-    int startX = (GetScreenWidth() / 2) - (COLUMNS * CELLSIZE) / 2;  
 
-    for (int i = 1; i < size; i++) {
-        int x = (i - 1) % COLUMNS;
-        int y = (i - 1) / COLUMNS;
-        switch(grid[i]){
-            case 1:
-                DrawRectangle(startX + x * CELLSIZE, startY + y * CELLSIZE, CELLSIZE, CELLSIZE, WHITE);
-                break;
-            default:
-                break;
-        }
-
-        if(abs(GetMouseX() - (startX + x * CELLSIZE)) <= 20 && abs(GetMouseY() - (startY + y * CELLSIZE)) <= 20){
-            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON)){
-                grid[i] = 0;
-            }
-            if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)){
-                grid[i] = 1;
+    for(int i = 0; i < blockamount; i++){
+        if(blocks[i].isBroken == true) continue;
+        if(fabsf(camera.target.x - blocks[i].x) >= GetScreenWidth() && fabsf(camera.target.y - blocks[i].y) >= GetScreenHeight()) continue;
+        DrawRectangle(blocks[i].x, blocks[i].y, 30, 30, blocks[i].color);
+        if(fabsf(SysGetMouseX() - blocks[i].x) <= 15 && fabsf(SysGetMouseY() - blocks[i].y) <= 15){
+            DrawRectangleLines(blocks[i].x, blocks[i].y, 30, 30, RED);
+            if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+                blocks[i].isBroken = true;
             }
         }
     }
+    
 }
+
+void UiCustomizeTerrain(){
+    RayGUIDrawSlider(10, 50, 200, 50, "", "", &height, 0, 40);
+    SysDrawText("Height", 210, 50, 20, BLACK);
+    RayGUIDrawSlider(10, 120, 200, 50, "", "", &spacing, 0, 3);
+    SysDrawText("Spacing", 210, 120, 20, BLACK);
+
+    int clicked = RayGUIDrawButton(10, 200, 100, 50, "Regenerate");
+    if(clicked == 1) init = false;
+}
+
+

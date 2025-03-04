@@ -8,12 +8,19 @@
 
 #include "../superheader.h"
 
+typedef struct _BLOCK {
+    int x;
+    int y;
+    Color color;
+    bool isBroken;
+} BLOCK;
 
-#define CELLSIZE 40
-#define COLUMNS 20
-#define ROWS 5
-void RenderGrid();
 
+
+
+void CreateBlock(int x, int y, Color color);
+void RenderChunk(int offset);
+void UiCustomizeTerrain();
 
 
 #endif
