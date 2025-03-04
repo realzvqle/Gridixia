@@ -1,8 +1,6 @@
 #include "exheaders/raylib.h"
 #include "player.h"
-#include "rayguiabs.h"
-#include "superheader.h"
-#include "terraingen/grid.h"
+#include "terraingen/terrain.h"
 #include "tools.h"
 
 
@@ -15,6 +13,7 @@ int main(){
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1600, 900, "2ND ATTEMPT TO FORGET THE PAST, WE WILL MAKE IT BROTHERS");
     SysSetup();
+    
     float value = 0;
     while(!WindowShouldClose()){
         BeginDrawing();
@@ -23,7 +22,6 @@ int main(){
         PlayerControl();
         //GenerateChunk(3);
         RenderChunk(0);
-        RenderChunk(90);
         EndMode2D();
         SysDrawFPS(10, 10);
         UiCustomizeTerrain();

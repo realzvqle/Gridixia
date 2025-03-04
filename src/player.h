@@ -11,6 +11,7 @@
 
 void SetupCamera();
 void PlayerControl();
-
+void LockControls();
+void UnlockControls();
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef GRID_H_INCLUDED
-#define GRID_H_INCLUDED
+#ifndef TERRAIN_H_INCLUDED
+#define TERRAIN_H_INCLUDED
 
 
 

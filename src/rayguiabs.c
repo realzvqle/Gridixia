@@ -7,6 +7,7 @@
 
 void RayGUIInitialize(){
     GuiSetFont(SysGetFont());
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 15); 
 }
 
 int RayGUIDrawButton(int x, int y, int sizeX, int sizeY, const char* text){
@@ -23,3 +24,4 @@ int RayGUIDrawSlider(int x, int y, int sizeX, int sizeY, char* textleft, char* t
     Rectangle rec = {x, y, sizeX, sizeY};
     return GuiSlider(rec, textleft, textright, value, min, max);
 }
+

@@ -1,16 +1,19 @@
-#include "grid.h"
+#include "terrain.h"
 #include "../tools.h"
 #include "../rayguiabs.h"
-
+#include <synchapi.h>
+#include <winbase.h>
+#include "../player.h"
 extern Camera2D camera;
 
-#define WORLDSIZE 100000
-BLOCK blocks[WORLDSIZE];
+#define CHUNKSIZE 100000
+BLOCK blocks[CHUNKSIZE];
 uint64_t blockamount = 0;
 static bool init = false;
-
+static bool ThreadFinished = false;
 static float height = 10;
 static float spacing = 0.1;
+static bool ThreadCreated = false;
 
 struct BRETURN{
     uint64_t bnum;
@@ -32,7 +35,7 @@ static struct BRETURN GetFreeBlock(){
 
 void CreateBlock(int x, int y, Color color){
     struct BRETURN b = GetFreeBlock();
-    if(blockamount + 1 >= WORLDSIZE){
+    if(blockamount + 1 >= CHUNKSIZE){
         printf("WORLDSIZE LIMIT REACHED\n");
         return;
     }
@@ -40,28 +43,48 @@ void CreateBlock(int x, int y, Color color){
     blocks[b.bnum].y = y;//roundf(y / 50.0f) * 50.0f;
     blocks[b.bnum].color = color;
     blocks[b.bnum].isBroken = false;
-    printf("Made a block! BNUM is %llu\n", b.bnum);
+    //printf("Made a block! BNUM is %llu\n", b.bnum);
     if(b.shouldincrement == true) blockamount++;
 }
 
+DWORD GenerateTerrain(LPVOID args){
+    Color color;
+    for(int i = 0; i < 300; i++){
+        for(int j = 0; j < 300; j++){
+            float wave = height*sin(i*spacing) * 30;
+            //Color h = {offset * 10, 0, 0, 255};
+            if(j < 10) color = DARKGREEN;
+            else if(j < 20) color = BROWN;
+            else color = GRAY;
+            CreateBlock((i) * 30, j * 30 + wave, color);
+        }
+    }
+    ThreadFinished = true;
+    return 0;
+}
 
 void RenderChunk(int offset) {
     static float prevtime;
+    static HANDLE hThread;
     if(init == false){
-        prevtime = GetTime();
-        blockamount = 0;
-        Color color;
-        for(int i = 0; i < 300; i++){
-            for(int j = 0; j < 300; j++){
-                float wave = height*sin(i*spacing) * 30;
-                //Color h = {offset * 10, 0, 0, 255};
-                if(j < 10) color = DARKGREEN;
-                else if(j < 20) color = BROWN;
-                else color = GRAY;
-                CreateBlock((i+offset) * 30, j * 30 + wave, color);
-            }
+        if(ThreadCreated == false){
+            ThreadFinished = false;
+            prevtime = GetTime();
+            hThread = CreateThread(NULL, 0, GenerateTerrain, NULL, 0, NULL);
+            ThreadCreated = true;
         }
-        init = true;
+       
+        //GenerateTerrain(NULL);
+        if(ThreadFinished == false){
+            LockControls();
+            ClearBackground(DARKBROWN);
+            return;
+        }
+        else {
+            UnlockControls();
+            init = true;
+            CloseHandle(hThread);
+        }
     }
 
     for(int i = 0; i < blockamount; i++){
@@ -93,13 +116,27 @@ void RenderChunk(int offset) {
 }
 
 void UiCustomizeTerrain(){
+    if(ThreadFinished == false){
+        const char* text = "Generating Terrain";
+        SysDrawText(text, ((float)GetScreenWidth() - MeasureTextEx(SysGetFont(), text, 30, 2).x) / 2, 
+        (float)GetScreenHeight() / 2, 30, WHITE);
+        char buffer[512];
+        sprintf(buffer, "Placing Block %llu...", blockamount);
+        SysDrawText(buffer, ((float)GetScreenWidth() - MeasureTextEx(SysGetFont(), buffer, 30, 2).x) / 2, 
+        ((float)GetScreenHeight() + 60) / 2, 30, WHITE);
+        return;
+    }
     RayGUIDrawSlider(10, 50, 200, 50, "", "", &height, 0, 40);
     SysDrawText("Height", 210, 50, 20, BLACK);
     RayGUIDrawSlider(10, 120, 200, 50, "", "", &spacing, 0, 2);
     SysDrawText("Spacing", 210, 120, 20, BLACK);
 
     int clicked = RayGUIDrawButton(10, 200, 100, 50, "Regenerate");
-    if(clicked == 1) init = false;
+    if(clicked == 1){
+        blockamount = 0;
+        ThreadCreated = false;
+        init = false;
+    } 
 }
 
 
