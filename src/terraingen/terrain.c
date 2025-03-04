@@ -48,6 +48,10 @@ static Rectangle BlocktypeToTexture(BLOCKTYPE type){
             Rectangle rec = {60, 0, 30, 30};
             return rec;
         }
+        case Brick:{
+            Rectangle rec = {120, 0, 30, 30};
+            return rec;      
+        }
         default:{
             Rectangle rec = {90, 0, 30, 30};
             return rec;
@@ -129,7 +133,7 @@ void RenderChunk(int offset) {
             if(GetTime() - prevtime >= 0.1){
                 int x = roundf(SysGetMouseX() / 30.0f) * 30.0f;
                 int y = roundf(SysGetMouseY() / 30.0f) * 30.0f;
-                CreateBlock(x, y, Stone);
+                CreateBlock(x, y, Brick);
                 printf("Creates Block at %d, %d\n",x, y);
                 prevtime = GetTime();
             }
