@@ -19,7 +19,7 @@ typedef struct _BLOCK {
     int x;
     int y;
     Color color;
-    Rectangle atlas;
+    Rectangle texture;
     BLOCKTYPE type;
     bool isBroken;
 } BLOCK;

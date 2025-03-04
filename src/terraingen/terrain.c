@@ -34,6 +34,27 @@ static struct BRETURN GetFreeBlock(){
     return b;
 }
 
+static Rectangle BlocktypeToTexture(BLOCKTYPE type){
+    switch(type){
+        case Dirt:{
+            Rectangle rec = {0, 0, 30, 30};
+            return rec;
+        }
+        case Grass:{
+            Rectangle rec = {30, 0, 30, 30};
+            return rec;
+        }    
+        case Stone:{
+            Rectangle rec = {60, 0, 30, 30};
+            return rec;
+        }
+        default:{
+            Rectangle rec = {90, 0, 30, 30};
+            return rec;
+        }
+    }
+}
+
 void CreateBlock(int x, int y, BLOCKTYPE type){
     //Color color;
     struct BRETURN b = GetFreeBlock();
@@ -41,34 +62,10 @@ void CreateBlock(int x, int y, BLOCKTYPE type){
         printf("WORLDSIZE LIMIT REACHED\n");
         return;
     }
+    blocks[b.bnum].type = type;
     blocks[b.bnum].x = x;//roundf(x / 50.0f) * 50.0f;
     blocks[b.bnum].y = y;//roundf(y / 50.0f) * 50.0f;
-    switch(type){
-        case Dirt:
-            blocks[b.bnum].atlas.x = 0;
-            blocks[b.bnum].atlas.y = 0;
-            blocks[b.bnum].atlas.height = 30;
-            blocks[b.bnum].atlas.width = 30;
-            break;
-        case Grass:
-            blocks[b.bnum].atlas.x = 30;
-            blocks[b.bnum].atlas.y = 0;
-            blocks[b.bnum].atlas.height = 30;
-            blocks[b.bnum].atlas.width = 30;
-            break;
-        case Stone:
-            blocks[b.bnum].atlas.x = 60;
-            blocks[b.bnum].atlas.y = 0;
-            blocks[b.bnum].atlas.height = 30;
-            blocks[b.bnum].atlas.width = 30;
-            break;
-        default:
-            blocks[b.bnum].atlas.x =61;
-            blocks[b.bnum].atlas.y = 0;
-            blocks[b.bnum].atlas.height = 30;
-            blocks[b.bnum].atlas.width = 30;
-            break;
-    }
+    blocks[b.bnum].texture = BlocktypeToTexture(type);
     blocks[b.bnum].isBroken = false;
     // printf("Made a block! BNUM is %llu\n", b.bnum);
     if(b.shouldincrement == true) blockamount++;
@@ -118,7 +115,7 @@ void RenderChunk(int offset) {
         if(fabsf(camera.target.y - blocks[i].y) >= GetScreenHeight()) continue;
         if(blocks[i].isBroken == true) continue;
         Vector2 pos = {blocks[i].x, blocks[i].y};
-        DrawTextureRec(atlas, blocks[i].atlas, pos, WHITE);
+        DrawTextureRec(atlas, blocks[i].texture, pos, WHITE);
         if(fabsf(SysGetMouseX() - blocks[i].x) <= 15 && fabsf(SysGetMouseY() - blocks[i].y) <= 15){
             DrawRectangleLines(blocks[i].x, blocks[i].y, 30, 30, RED);
             if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
