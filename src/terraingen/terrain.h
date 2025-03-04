@@ -8,11 +8,14 @@
 
 #include "../superheader.h"
 
+#define BLOCKTYPEAMOUNT 5
+
 typedef enum _BLOCKTYPE {
     Grass,
     Dirt,
     Stone,
-    Brick
+    Brick,
+    Unknown
 } BLOCKTYPE;
 
 typedef struct _BLOCK {

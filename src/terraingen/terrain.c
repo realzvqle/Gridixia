@@ -6,7 +6,7 @@
 #include "../player.h"
 extern Camera2D camera;
 
-#define CHUNKSIZE 100000
+#define CHUNKSIZE 600000
 BLOCK blocks[CHUNKSIZE];
 uint64_t blockamount = 0;
 static bool init = false;
@@ -14,6 +14,8 @@ static bool ThreadFinished = false;
 static float height = 10;
 static float spacing = 0.1;
 static bool ThreadCreated = false;
+
+BLOCKTYPE unitype = Stone;
 
 extern Texture2D atlas;
 struct BRETURN{
@@ -77,8 +79,8 @@ void CreateBlock(int x, int y, BLOCKTYPE type){
 
 DWORD GenerateTerrain(LPVOID args){
     BLOCKTYPE type;
-    for(int i = 0; i < 300; i++){
-        for(int j = 0; j < 300; j++){
+    for(int i = -100; i < 500; i++){
+        for(int j = 0; j < 200; j++){
             float wave = height*sin(i*spacing) * 30;
             if(j < 10) type = Grass;
             else if(j < 20) type = Dirt;
@@ -120,7 +122,9 @@ void RenderChunk(int offset) {
         if(blocks[i].isBroken == true) continue;
         Vector2 pos = {blocks[i].x, blocks[i].y};
         DrawTextureRec(atlas, blocks[i].texture, pos, WHITE);
+        if(abs(GetMouseY() - (GetScreenHeight() - 60)) <= 60) continue;
         if(fabsf(SysGetMouseX() - blocks[i].x) <= 15 && fabsf(SysGetMouseY() - blocks[i].y) <= 15){
+            
             DrawRectangleLines(blocks[i].x, blocks[i].y, 30, 30, RED);
             if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
                 blocks[i].isBroken = true;
@@ -133,7 +137,7 @@ void RenderChunk(int offset) {
             if(GetTime() - prevtime >= 0.1){
                 int x = roundf(SysGetMouseX() / 30.0f) * 30.0f;
                 int y = roundf(SysGetMouseY() / 30.0f) * 30.0f;
-                CreateBlock(x, y, Brick);
+                CreateBlock(x, y, unitype);
                 printf("Creates Block at %d, %d\n",x, y);
                 prevtime = GetTime();
             }
@@ -143,6 +147,20 @@ void RenderChunk(int offset) {
     
     
 }
+
+void ItemsBar(){
+    Color bcolor = {100, 0, 0, 100};
+    DrawRectangle(0, GetScreenHeight() - 60, GetScreenWidth(), 60,bcolor);
+    for(int i = 0; i < BLOCKTYPEAMOUNT; i++){
+        Vector2 vec = {((float)GetScreenWidth() - BLOCKTYPEAMOUNT * 35 + (i * 70)) / 2, GetScreenHeight() - 40};
+        Vector2 size = {60, 60};
+        int button = RayGUIDrawButton(vec.x, vec.y, 30, 30, "");
+        if(button == 1) unitype = (BLOCKTYPE)i;
+        Rectangle rec = BlocktypeToTexture((BLOCKTYPE)i);
+        DrawTextureRec(atlas, rec, vec, WHITE);
+    }
+}
+
 
 void UiCustomizeTerrain(){
     
@@ -156,6 +174,7 @@ void UiCustomizeTerrain(){
         ((float)GetScreenHeight() + 60) / 2, 30, WHITE);
         return;
     }
+    ItemsBar();
     Color bcolor = {100, 0, 0, 100};
     DrawRectangle(0, 0, 400, 400,bcolor);
     SysDrawFPS(10, 10);
