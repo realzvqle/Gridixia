@@ -43,7 +43,7 @@ void CreateBlock(int x, int y, Color color){
     blocks[b.bnum].y = y;//roundf(y / 50.0f) * 50.0f;
     blocks[b.bnum].color = color;
     blocks[b.bnum].isBroken = false;
-    //printf("Made a block! BNUM is %llu\n", b.bnum);
+    // printf("Made a block! BNUM is %llu\n", b.bnum);
     if(b.shouldincrement == true) blockamount++;
 }
 
@@ -88,15 +88,15 @@ void RenderChunk(int offset) {
     }
 
     for(int i = 0; i < blockamount; i++){
+        if(fabsf(camera.target.x - blocks[i].x) >= GetScreenWidth()) continue;
+        if(fabsf(camera.target.y - blocks[i].y) >= GetScreenHeight()) continue;
         if(blocks[i].isBroken == true) continue;
-        if(fabsf(camera.target.x - blocks[i].x) >= GetScreenWidth() && fabsf(camera.target.y - blocks[i].y) >= GetScreenHeight()) continue;
         DrawRectangle(blocks[i].x, blocks[i].y, 30, 30, blocks[i].color);
         if(fabsf(SysGetMouseX() - blocks[i].x) <= 15 && fabsf(SysGetMouseY() - blocks[i].y) <= 15){
             DrawRectangleLines(blocks[i].x, blocks[i].y, 30, 30, RED);
             if(IsMouseButtonDown(MOUSE_BUTTON_RIGHT)){
                 blocks[i].isBroken = true;
                 printf("Destroys Block at %d, %d\n",blocks[i].x, blocks[i].y);
-
             }
             
         }
